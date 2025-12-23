@@ -1,0 +1,19 @@
+x = int(input("x əsasını daxil edin: "))
+y = int(input("y ədədini daxil edin: "))
+if x == 1:
+    if y == 1:
+        print(f"{y} = {x}^0 → True")
+    else:
+        print(f"{y} 1-in qüvvəti deyil → False")
+else:
+    quvvet = 1  
+    q = 0       
+    print(f"\n{y} ədədinin {x}-in qüvvəti olub-olmadığı yoxlanılır...")
+    while quvvet < y:
+        quvvet *= x
+        q += 1
+        print(f"{x}^{q} = {quvvet}")
+    if quvvet == y:
+        print(f"\n✓ {y} = {x}^{q} → True")
+    else:
+        print(f"\n✗ {y} ≠ {x}^n → False")

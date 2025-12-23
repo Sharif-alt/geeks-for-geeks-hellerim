@@ -1,0 +1,22 @@
+def isPalindrome(s):
+    """
+    Check if a string is palindrome using two pointers approach
+    Returns 1 if palindrome, 0 otherwise
+    """
+    left, right = 0, len(s) - 1
+    
+    while left < right:
+        if s[left] != s[right]:
+            return 0
+        left += 1
+        right -= 1
+    
+    return 1
+
+
+if __name__ == "__main__":
+    test_strings = ["abba", "abc", "racecar", "hello", "a", ""]
+    
+    for s in test_strings:
+        result = isPalindrome(s)
+        print(f"'{s}' -> {result}")

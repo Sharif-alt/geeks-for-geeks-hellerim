@@ -1,0 +1,371 @@
+from collections import deque
+import time
+
+class GraphBFS:
+    def __init__(self, vertices):
+        self.vertices = vertices
+        self.adj_list = [[] for _ in range(vertices)]
+    
+    def add_edge(self, u, v, directed=False):
+        """Kənar əlavə et"""
+        self.adj_list[u].append(v)
+        if not directed:
+            self.adj_list[v].append(u)
+    
+    def bfs_from_source(self, start):
+        """Müəyyən başlanğıc nöqtəsindən BFS"""
+        if start < 0 or start >= self.vertices:
+            return []
+        
+        visited = [False] * self.vertices
+        result = []
+        queue = deque([start])
+        visited[start] = True
+        
+        print(f"\n🔍 BFS başlanğıcı: {start}")
+        print("-" * 40)
+        
+        level = 0
+        while queue:
+            level_size = len(queue)
+            print(f"\n📊 Səviyyə {level}: {list(queue)}")
+            
+            for _ in range(level_size):
+                node = queue.popleft()
+                result.append(node)
+                print(f"  Node {node} işlənir...")
+                
+                for neighbor in self.adj_list[node]:
+                    if not visited[neighbor]:
+                        visited[neighbor] = True
+                        queue.append(neighbor)
+                        print(f"    → {neighbor} əlavə edildi")
+            
+            level += 1
+        
+        return result
+    
+    def bfs_all_components(self):
+        """Bütün qraf üçün BFS (disconnected)"""
+        visited = [False] * self.vertices
+        result = []
+        components = 0
+        
+        print("\n🌐 BÜTÜN QRAF ÜÇÜN BFS")
+        print("=" * 50)
+        
+        for node in range(self.vertices):
+            if not visited[node]:
+                components += 1
+                print(f"\n🔗 Komponent {components}:")
+                print("-" * 30)
+                
+                queue = deque([node])
+                visited[node] = True
+                component_nodes = []
+                
+                while queue:
+                    current = queue.popleft()
+                    component_nodes.append(current)
+                    
+                    for neighbor in self.adj_list[current]:
+                        if not visited[neighbor]:
+                            visited[neighbor] = True
+                            queue.append(neighbor)
+                
+                result.extend(component_nodes)
+                print(f"  Node'lar: {component_nodes}")
+        
+        print(f"\n📈 Ümumi komponent sayı: {components}")
+        return result
+    
+    def shortest_path_unweighted(self, start, end):
+        """Çəkisiz qrafda ən qısa yol"""
+        if start == end:
+            return [start], 0
+        
+        visited = [False] * self.vertices
+        parent = [-1] * self.vertices
+        queue = deque([start])
+        visited[start] = True
+        
+        while queue:
+            node = queue.popleft()
+            
+            if node == end:
+                # Yolu tapdıq, geri izlə
+                path = []
+                while node != -1:
+                    path.append(node)
+                    node = parent[node]
+                return path[::-1], len(path) - 1
+            
+            for neighbor in self.adj_list[node]:
+                if not visited[neighbor]:
+                    visited[neighbor] = True
+                    parent[neighbor] = node
+                    queue.append(neighbor)
+        
+        return [], -1  # Yol yoxdur
+    
+    def has_cycle_undirected(self):
+        """Undirected qrafda cycle var mı?"""
+        visited = [False] * self.vertices
+        
+        for node in range(self.vertices):
+            if not visited[node]:
+                queue = deque([(node, -1)])  # (node, parent)
+                visited[node] = True
+                
+                while queue:
+                    current, parent = queue.popleft()
+                    
+                    for neighbor in self.adj_list[current]:
+                        if not visited[neighbor]:
+                            visited[neighbor] = True
+                            queue.append((neighbor, current))
+                        elif neighbor != parent:
+                            # Cycle tapdıq
+                            return True
+        
+        return False
+    
+    def print_graph(self):
+        """Qrafı çap et"""
+        print("\n📊 QRAF QURULUŞU:")
+        print("=" * 40)
+        for i in range(self.vertices):
+            print(f"Node {i}: {self.adj_list[i]}")
+        print("=" * 40)
+
+def create_sample_graph():
+    """Nümunə qraf yarat"""
+    print("\n🌍 NÜMUNƏ QRAFLAR")
+    print("=" * 50)
+    
+    print("\n1. Connected Qraf:")
+    print("   Nodes: 0-1-2-3-4")
+    print("   Edges: 0-1, 0-2, 1-2, 2-3, 2-4")
+    
+    g1 = GraphBFS(5)
+    g1.add_edge(0, 1)
+    g1.add_edge(0, 2)
+    g1.add_edge(1, 2)
+    g1.add_edge(2, 3)
+    g1.add_edge(2, 4)
+    
+    print("\n2. Disconnected Qraf:")
+    print("   Komponent 1: 0-2-3-1")
+    print("   Komponent 2: 4-5")
+    
+    g2 = GraphBFS(6)
+    g2.add_edge(0, 2)
+    g2.add_edge(0, 3)
+    g2.add_edge(1, 2)
+    g2.add_edge(4, 5)
+    
+    return g1, g2
+
+def main():
+    print("=" * 60)
+    print("🔍 BREADTH-FIRST SEARCH (BFS) PROQRAMI")
+    print("=" * 60)
+    
+    g1, g2 = create_sample_graph()
+    
+    while True:
+        print("\n" + "=" * 40)
+        print("📋 ƏMƏLİYYATLAR MENYUSU")
+        print("=" * 40)
+        print("1. Connected qrafda BFS (Node 0'dan)")
+        print("2. Disconnected qrafda BFS")
+        print("3. Ən qısa yol tap (unweighted)")
+        print("4. Cycle yoxla (undirected)")
+        print("5. Qraf quruluşunu göstər")
+        print("6. Özəl qraf yarat")
+        print("7. BFS animasiyası (səviyyəli)")
+        print("8. Çıxış")
+        choice = input("Seçim (1-8): ")
+        
+        if choice == "1":
+            print("\n🚀 CONNECTED QRAFDA BFS")
+            g1.print_graph()
+            result = g1.bfs_from_source(0)
+            print(f"\n✅ BFS Nəticəsi: {result}")
+        
+        elif choice == "2":
+            print("\n🚀 DISCONNECTED QRAFDA BFS")
+            g2.print_graph()
+            result = g2.bfs_all_components()
+            print(f"\n✅ BFS Nəticəsi: {result}")
+        
+        elif choice == "3":
+            print("\n📍 ƏN QISA YOL AXTARIŞI")
+            g1.print_graph()
+            
+            try:
+                start = int(input("Başlanğıc node: "))
+                end = int(input("Bitiş node: "))
+                
+                if 0 <= start < g1.vertices and 0 <= end < g1.vertices:
+                    path, distance = g1.shortest_path_unweighted(start, end)
+                    
+                    if path:
+                        print(f"\n✅ Ən qısa yol: {' → '.join(map(str, path))}")
+                        print(f"   Məsafə: {distance} kənar")
+                    else:
+                        print(f"\n❌ {start} və {end} arasında yol yoxdur!")
+                else:
+                    print("❌ Yalnış node nömrəsi!")
+            except ValueError:
+                print("❌ Rəqəm daxil edin!")
+        
+        elif choice == "4":
+            print("\n🔁 CYCLE YOXLAMA")
+            g1.print_graph()
+            
+            if g1.has_cycle_undirected():
+                print("\n✅ Qrafda CYCLE var!")
+            else:
+                print("\n✅ Qrafda cycle YOXDUR!")
+            
+            print("\nDisconnected qraf üçün:")
+            if g2.has_cycle_undirected():
+                print("✅ Qrafda CYCLE var!")
+            else:
+                print("✅ Qrafda cycle YOXDUR!")
+        
+        elif choice == "5":
+            print("\n1. Connected Qraf:")
+            g1.print_graph()
+            
+            print("\n2. Disconnected Qraf:")
+            g2.print_graph()
+        
+        elif choice == "6":
+            try:
+                vertices = int(input("Node sayı: "))
+                edges = int(input("Kənar sayı: "))
+                
+                graph = GraphBFS(vertices)
+                
+                print(f"\n{edges} kənar əlavə edin (u v formatında):")
+                for i in range(edges):
+                    u, v = map(int, input(f"Kənar {i+1}: ").split())
+                    graph.add_edge(u, v)
+                
+                print("\n✅ Özəl qraf yaradıldı!")
+                graph.print_graph()
+                
+                # Yeni qraf üzərində test et
+                result = graph.bfs_from_source(0)
+                print(f"\nBFS nəticəsi: {result}")
+            
+            except ValueError:
+                print("❌ Yalnış daxiletmə!")
+        
+        elif choice == "7":
+            print("\n🎬 BFS ANİMASİYASI")
+            print("=" * 40)
+            
+            # Kiçik qraf üçün animasiya
+            anim_graph = GraphBFS(6)
+            anim_graph.add_edge(0, 1)
+            anim_graph.add_edge(0, 2)
+            anim_graph.add_edge(1, 3)
+            anim_graph.add_edge(2, 4)
+            anim_graph.add_edge(2, 5)
+            
+            print("Qraf:")
+            print("    0")
+            print("   / \\")
+            print("  1   2")
+            print(" /   / \\")
+            print("3   4   5")
+            
+            print("\nBFS prosesi:")
+            result = anim_graph.bfs_from_source(0)
+            print(f"\n✅ Final nəticə: {result}")
+        
+        elif choice == "8":
+            print("\n👋 Proqramdan çıxılır...")
+            break
+        
+        else:
+            print("❌ Yanlış seçim!")
+        
+        if choice != "8":
+            input("\n⏎ Davam etmək üçün Enter basın...")
+
+# Əlavə BFS Alqoritmləri
+
+def bfs_level_order(adj_list, start):
+    """Hər səviyyəni ayrı-ayrı qaytarır"""
+    visited = [False] * len(adj_list)
+    levels = []
+    queue = deque([start])
+    visited[start] = True
+    
+    while queue:
+        level_size = len(queue)
+        current_level = []
+        
+        for _ in range(level_size):
+            node = queue.popleft()
+            current_level.append(node)
+            
+            for neighbor in adj_list[node]:
+                if not visited[neighbor]:
+                    visited[neighbor] = True
+                    queue.append(neighbor)
+        
+        levels.append(current_level)
+    
+    return levels
+
+def bfs_with_distance(adj_list, start):
+    """Hər node'a olan məsafəni qaytarır"""
+    visited = [False] * len(adj_list)
+    distance = [-1] * len(adj_list)
+    queue = deque([start])
+    visited[start] = True
+    distance[start] = 0
+    
+    while queue:
+        node = queue.popleft()
+        
+        for neighbor in adj_list[node]:
+            if not visited[neighbor]:
+                visited[neighbor] = True
+                distance[neighbor] = distance[node] + 1
+                queue.append(neighbor)
+    
+    return distance
+
+def bfs_connected_components(adj_list):
+    """Bütün connected komponentləri tapır"""
+    visited = [False] * len(adj_list)
+    components = []
+    
+    for node in range(len(adj_list)):
+        if not visited[node]:
+        
+            component = []
+            queue = deque([node])
+            visited[node] = True
+            
+            while queue:
+                current = queue.popleft()
+                component.append(current)
+                
+                for neighbor in adj_list[current]:
+                    if not visited[neighbor]:
+                        visited[neighbor] = True
+                        queue.append(neighbor)
+            
+            components.append(component)
+    
+    return components
+
+if __name__ == "__main__":
+    main()

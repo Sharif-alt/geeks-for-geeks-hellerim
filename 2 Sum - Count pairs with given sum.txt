@@ -1,0 +1,65 @@
+def count_pairs(arr, target):
+    """
+    Count pairs with given sum using hash map
+    """
+    freq = {}
+    count = 0
+    
+    for num in arr:
+        complement = target - num
+        if complement in freq:
+            count += freq[complement]
+        freq[num] = freq.get(num, 0) + 1
+    
+    return count
+
+def count_pairs_sorted(arr, target):
+    """
+    Count pairs with given sum using two pointers (when array is sorted)
+    """
+    arr_sorted = sorted(arr)
+    left, right = 0, len(arr_sorted) - 1
+    count = 0
+    
+    while left < right:
+        current_sum = arr_sorted[left] + arr_sorted[right]
+        if current_sum == target:
+            # Handle duplicates
+            if arr_sorted[left] == arr_sorted[right]:
+                # All elements between left and right are the same
+                n = right - left + 1
+                count += n * (n - 1) // 2
+                break
+            else:
+                # Count duplicates on left and right
+                left_count = 1
+                right_count = 1
+                while left + 1 < right and arr_sorted[left] == arr_sorted[left + 1]:
+                    left_count += 1
+                    left += 1
+                while right - 1 > left and arr_sorted[right] == arr_sorted[right - 1]:
+                    right_count += 1
+                    right -= 1
+                count += left_count * right_count
+                left += 1
+                right -= 1
+        elif current_sum < target:
+            left += 1
+        else:
+            right -= 1
+    
+    return count
+
+# Test with examples
+if __name__ == "__main__":
+    test_cases = [
+        ([1, 5, 7, -1, 5], 6),
+        ([1, 1, 1, 1], 2),
+        ([10, 12, 10, 15, -1], 125),
+        ([1, 2, 3, 4, 5], 6)
+    ]
+    
+    for arr, target in test_cases:
+        result1 = count_pairs(arr, target)
+        result2 = count_pairs_sorted(arr, target)
+        print(f"Array {arr} has {result1} pairs summing to {target}")
